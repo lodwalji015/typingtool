@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Page</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent both vertical and horizontal scrolling */
+            height: 100%; /* Ensure the height is 100% to cover the entire viewport */
+        }
+
+        /* Header styling */
+        #header {
+            width: 100%;
+            background-color: #fff;
+            color: #8B0000;
+            padding: 10px 20px;
+            font-size: 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #ccc;
+        }
+
+        #logo {
+            width: 70px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+        .container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Option buttons */
+        .option-button {
+            background-color: #87ceeb;
+            color: white;
+            padding: 15px 30px;
+            margin: 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .option-button:hover {
+            background-color: #6495ed;
+        }
+
+        /* Result display container */
+        .result-container {
+            margin-top: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #typed-matter {
+            font-size: 18px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 100%; /* Ensure it doesn't overflow the container */
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+            box-sizing: border-box; /* Prevents padding from increasing width */
+            resize: none; /* Disable resizing */
+        }
+
+        /* Error message container */
+        #error-container {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+            font-weight: bold;
+        }
+
+        /* For PDF download button */
+        #download-pdf {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #download-pdf:hover {
+            background-color: #45a049;
+        }
+
+        /* Bottom buttons container */
+        .bottom-buttons {
+            margin-top: 30px;
+        }
+
+        .bottom-buttons button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .bottom-buttons button:hover {
+            background-color: #45a049;
+        }
+
+        /* Word count display */
+        #word-count {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Align candidate details to the left */
+        #candidate-details {
+            text-align: left; /* Align text to the left */
+            margin-top: 20px;
+            font-size: 18px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+    <img id="logo" src="D:/Downloads/web/Ssc.png" alt="SSC Logo">
+    <span>SSC STENOGRAPHER SKILL TEST - Result</span>
+</div>
+
+<!-- Main Content Container -->
+<div class="container">
+
+    <!-- Result Display Container -->
+    <div id="typed-matter-container" class="result-container">
+        <h3>Result</h3>
+
+        <!-- Candidate Information Display -->
+        <div id="candidate-details">
+            <p><strong>Candidate:</strong> <span id="candidate-name"></span></p>
+            <p><strong>Test Type:</strong> <span id="test-type"></span></p>
+            <p><strong>Test Name:</strong> <span id="test-name"></span></p>
+        </div>
+
+        <!-- Typed Matter Area -->
+        <textarea id="typed-matter" readonly></textarea>
+
+        <!-- Bottom Buttons -->
+        <div class="bottom-buttons">
+            <button class="option-button" id="login-page">Login Page</button>
+            <button class="option-button" id="download-pdf">Save as PDF</button>
+        </div>
+    </div>
+
+    <!-- Word Count -->
+    <div id="word-count"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    // Retrieve data from localStorage
+    const candidateName = localStorage.getItem("candidateName") || "Unknown";
+    const testType = localStorage.getItem("testType") || "Unknown";
+    const testName = localStorage.getItem("testName") || "Unknown";
+    const typedMatter = localStorage.getItem("typedMatter") || "No matter typed.";
+
+    // Display candidate details
+    document.getElementById("candidate-name").textContent = candidateName;
+    document.getElementById("test-type").textContent = testType;
+    document.getElementById("test-name").textContent = testName;
+
+    // Display typed matter in the text area
+    document.getElementById('typed-matter').value = typedMatter;
+
+    // Function to count words
+    function countWords(text) {
+        return text.trim().split(/\s+/).length;
+    }
+
+    // Display word count
+    const wordCount = countWords(typedMatter);
+    document.getElementById('word-count').textContent = `Words Typed: ${wordCount}`;
+
+    // Handle PDF Download
+    document.getElementById('download-pdf').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Set PDF document settings
+        doc.setFont("helvetica");
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+
+        // Add candidate details to the PDF
+        doc.text(`Candidate: ${candidateName}`, 10, 20);
+        doc.text(`Test Type: ${testType}`, 10, 30);
+        doc.text(`Test Name: ${testName}`, 10, 40);
+
+        // Set text starting position for typed matter
+        let yPosition = 50;
+        const maxWordsPerLine = 120; // Approximate number of words per line
+        const maxLinesPerPage = 40; // Maximum lines per page
+
+        // Add typed matter to PDF
+        const lines = doc.splitTextToSize(typedMatter, 180); // Adjust the width of the text
+        let lineCount = 0;
+        lines.forEach((line, index) => {
+            if (yPosition > 280) { // If the current page is full, add a new page
+                doc.addPage();
+                yPosition = 20; // Reset the position for the new page
+                lineCount = 0;
+            }
+            doc.text(line, 10, yPosition);
+            yPosition += 10;
+            lineCount++;
+        });
+
+        // Save the PDF
+        doc.save('typed_matter.pdf');
+    });
+
+    // Handle Login Page redirection
+    document.getElementById('login-page').addEventListener('click', function() {
+        window.location.href = 'index.html'; // Redirect to the index page
+    });
+
+</script>
+
+</body>
+</html>
